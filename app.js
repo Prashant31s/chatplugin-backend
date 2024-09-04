@@ -22,6 +22,9 @@ connectDB();
 app.use(express.json());
 app.use('/api', router);
 
+app.get("/", (req, res) => {
+  res.send("HEllo world"); //response for the root url
+});
 // Socket.IO connection
 io.on('connection', (socket) => {
   console.log('A user connected');
