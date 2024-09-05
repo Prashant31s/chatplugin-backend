@@ -6,6 +6,14 @@ const MessageSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  finalroom: {
+    type:String,
+    required:true,
+  },
+  user: {
+    type:String,
+    require:true,
+  },
   message: {
     type: String,
     required: true,
