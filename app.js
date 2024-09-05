@@ -29,15 +29,22 @@ app.get("/", (req, res) => {
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  socket.on('join', ({ appId }) => {
-    socket.join(appId);
-    console.log(`User joined room: ${appId}`);
+  socket.on('join', async({ finalroom }) => {
+    socket.join(finalroom);
+    console.log(`User joined room: ${finalroom}`);
+    try {
+      const messages = await Message.find({ finalroom }).sort({ createdAt: 1 }); // Sort messages by creation date
+      socket.emit('messageHistory', messages);
+    } catch (error) {
+      console.error('Error fetching message history:', error);
+      socket.emit('error', 'Failed to fetch message history');
+    }
   });
 
-  socket.on('message', async ({ appId, message }) => {
-    const newMessage = new Message({ appId, message });
+  socket.on('message', async ({ appId,finalroom,user, message }) => {
+    const newMessage = new Message({ appId, finalroom,user,message });
     await newMessage.save();
-    io.to(appId).emit('message', newMessage);
+    io.to(finalroom).emit('message', newMessage);
   });
 
   socket.on('disconnect', () => {
