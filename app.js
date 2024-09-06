@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  socket.on('join', async({ finalroom }) => {
+  socket.on('join-room', async( finalroom ) => {
     socket.join(finalroom);
     console.log(`User joined room: ${finalroom}`);
     try {
@@ -44,7 +44,7 @@ io.on('connection', (socket) => {
   socket.on('message', async ({ appId,finalroom,user, message }) => {
     const newMessage = new Message({ appId, finalroom,user,message });
     await newMessage.save();
-    io.to(finalroom).emit('message', newMessage);
+    io.to(finalroom).emit('receive-message', newMessage);
   });
 
   socket.on('disconnect', () => {
