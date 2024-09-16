@@ -1,18 +1,17 @@
-// backend/models/Message.js
 import mongoose from "mongoose";
-
+ 
 const MessageSchema = new mongoose.Schema({
   appId: {
     type: String,
     required: true,
   },
   finalroom: {
-    type:String,
-    required:true,
+    type: String,
+    required: true,
   },
   user: {
-    type:String,
-    require:true,
+    type: String,
+    required: true,
   },
   message: {
     type: String,
@@ -22,6 +21,12 @@ const MessageSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  reactions: [
+    {
+      emoji: String,
+      user: String,
+    },
+  ],
 });
-
-export default mongoose.model('Message', MessageSchema);
+ 
+export default mongoose.model('Message', MessageSchema)
