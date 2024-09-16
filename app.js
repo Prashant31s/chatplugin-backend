@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
  
   socket.on('join-room', async (finalroom) => {
     socket.join(finalroom);
-    console.log(`User joined room: ${finalroom}`);
+    
     try {
       const messages = await Message.find({ finalroom }).sort({ createdAt: 1 });
       const serializedMessages = messages.map(msg => {
@@ -39,7 +39,7 @@ io.on('connection', (socket) => {
         if (serialized.createdAt) {
           serialized.createdAt = serialized.createdAt.toISOString();
         }
-        console.log('Serialized historical message:', serialized);
+        
         return serialized;
       });
       socket.emit('messageHistory', serializedMessages);
@@ -56,7 +56,7 @@ io.on('connection', (socket) => {
     if (serializedMessage.createdAt) {
       serializedMessage.createdAt = serializedMessage.createdAt.toISOString();
     }
-    console.log('New message:', serializedMessage);
+
     io.to(finalroom).emit('receive-message', serializedMessage);
   });
 
@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on("edit-message", async ({ messageId, newContent, room }) => {
-    console.log("message", messageId,newContent, room )
+   
     
     try {
       //find the message to be edited
@@ -86,6 +86,32 @@ io.on('connection', (socket) => {
       }
     } catch (err) {
       console.error("Error editing message:", err);
+    }
+  });
+
+  socket.on("react-to-message", async ({ messageId, emoji, user, room }) => {
+    try {
+      const message = await Message.findOne({ _id: messageId });
+      if (message) {
+        // Handle reactions
+        const existingReaction = message.reactions.find(
+          (reaction) => reaction.user === user && reaction.emoji === emoji
+        );
+ 
+        if (existingReaction) {
+          message.reactions = message.reactions.filter(
+            (reaction) =>
+              !(reaction.user === user && reaction.emoji === emoji)
+          );
+        } else {
+          message.reactions.push({ emoji, user });
+        }
+ 
+        await message.save();
+        io.to(room).emit("message-reaction", { messageId, reactions: message.reactions });
+      }
+    } catch (err) {
+      console.error("Error reacting to message:", err);
     }
   });
 
